@@ -4,8 +4,12 @@ import Navbar from "../SharedComp/Navbar";
 const Root = () => {
     return (
         <div>
-            <Navbar />
-            <Outlet />
+            <div>
+                <Navbar />
+            </div>
+            <div className="">
+                <Outlet />
+            </div>
         </div>
     );
 };

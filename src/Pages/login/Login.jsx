@@ -1,10 +1,12 @@
 import loginPic from '../../assets/login.png'
 import google from '../../assets/google.png'
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useContext, useState } from 'react';
 import { AuthContext } from '../../Auth/AuthProvider';
 import Swal from 'sweetalert2';
 const Login = () => {
+    const location = useLocation();
+    const navigate = useNavigate();
     const { signIn, googlLogin, passReset } = useContext(AuthContext)
     const [error, setError] = useState('')
     const handleSubmit = (e) => {
@@ -12,10 +14,14 @@ const Login = () => {
         const form = e.target;
         const email = form.email.value;
         const password = form.password.value;
-        console.log(email, password)
         signIn(email, password)
-            .then((result) => {
-                console.log(result)
+            .then(() => {
+                Swal.fire({
+                    title: "Thanks for Join",
+                    text: "You successfully join with us!!!!",
+                    icon: "success"
+                });
+                navigate(location.pathname)
             }).catch((err) => {
                 console.log(err.message)
                 if (err.message === 'Firebase: Error (auth/invalid-credential).') {
@@ -27,8 +33,13 @@ const Login = () => {
     }
     const handleGoogle = () => {
         googlLogin()
-            .then((result) => {
-                console.log(result)
+            .then(() => {
+                Swal.fire({
+                    title: "Thanks for Join",
+                    text: "You successfully join with us!!!!",
+                    icon: "success"
+                });
+                navigate(location.state ? location.state : '/')
             }).catch((err) => {
                 console.log(err)
             });
@@ -49,7 +60,6 @@ const Login = () => {
             showCancelButton: true,
             confirmButtonText: "sent",
             preConfirm: (data) => {
-                console.log(data)
                 passReset(data)
                     .then(() => {
                         Swal.fire({
@@ -61,7 +71,7 @@ const Login = () => {
                     .catch(() => {
                         Swal.fire({
                             title: "",
-                            text:'Anything might be wrong!!!',
+                            text: 'Anything might be wrong!!!',
                             icon: "error"
                         });
                     })
@@ -84,7 +94,7 @@ const Login = () => {
                         <div className="w-[calc(100%-12px)]">
                             <a
                                 onClick={handleGoogle}
-                                className="flex items-center justify-center h-14 gap-3 bg-gray-100 border border-gray-300 rounded-lg text-gray-800 font-medium hover:bg-gray-200 hover:border-indigo-500 transition"
+                                className="flex cursor-pointer items-center justify-center h-14 gap-3 bg-gray-100 border border-gray-300 rounded-lg text-gray-800 font-medium hover:bg-gray-200 hover:border-indigo-500 transition"
                             >
                                 <img src={google} alt="Google" className="w-6" />
                                 <span>Google</span>

@@ -12,47 +12,72 @@ import {
     sendPasswordResetEmail
 } from "firebase/auth";
 import app from "./firebase.config";
+import useAxios from '../hooks/useAxios';
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext(null)
+
+
 const AuthProvider = ({ children }) => {
+    const axiosBase = useAxios()
     const [user, setUser] = useState(null)
+    const [loading, setLoading] = useState(true)
     const auth = getAuth(app);
     const googleProvider = new GoogleAuthProvider();
 
     const signUp = (email, password) => {
+        setLoading(true)
         return createUserWithEmailAndPassword(auth, email, password)
     }
 
     const signIn = (email, password) => {
+        setLoading(true)
         return signInWithEmailAndPassword(auth, email, password)
     }
 
     const googlLogin = () => {
+        setLoading(true)
         return signInWithPopup(auth, googleProvider)
     }
 
     const logOut = () => {
+        setLoading(true)
         return signOut(auth)
     }
 
     const updateUser = (name) => {
-        updateProfile(auth.currentUser, { displayName: name })
+        return updateProfile(user, { displayName: name })
     }
 
     const passReset = (email) => {
+        setLoading(true)
         return sendPasswordResetEmail(auth, email)
     }
+
     useEffect(() => {
+
         const unSubscribe = onAuthStateChanged(auth, (currentUser) => {
             setUser(currentUser)
-            console.log(currentUser)
+            if (currentUser) {
+                axiosBase.post('/jwt', { email: currentUser.email }, { withCredentials: true })
+                    .then(() => {
+                        // data is responding
+                    })
+            }
+            else {
+                axiosBase.get('/logout', { withCredentials: true })
+                    .then(() => {
+                        // data is responding
+                    })
+            }
+            setLoading(false)
+
         })
 
         return () => {
             unSubscribe();
         }
-    }, [])
+    }, [auth, axiosBase])
 
     const authValue = {
         signUp,
@@ -61,7 +86,9 @@ const AuthProvider = ({ children }) => {
         logOut,
         updateUser,
         passReset,
-        user
+        setUser,
+        user,
+        loading
     }
     return (
         <AuthContext.Provider value={authValue}>

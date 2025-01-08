@@ -1,12 +1,14 @@
 import { useContext, useState } from 'react';
 import loginPic from '../../assets/login.png'
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../Auth/AuthProvider';
+import Swal from 'sweetalert2';
 const SignUp = () => {
-    const { signUp, updateUser } = useContext(AuthContext)
+    const { signUp, updateUser, setUser, user } = useContext(AuthContext)
     const [emailErr, setEmailErr] = useState('');
     const [passwordErr, setPasswordErr] = useState('');
     const [confirmPassErr, setConfirmPassErr] = useState('');
+    const navigate = useNavigate()
     const handleSubmit = (e) => {
         e.preventDefault();
         const form = e.target;
@@ -26,10 +28,20 @@ const SignUp = () => {
         }
 
         signUp(email, password)
-            .then((result) => {
-                console.log(result)
+            .then(() => {
+                Swal.fire({
+                    title: "Thanks for Join",
+                    text: "You successfully join with us!!!!",
+                    icon: "success"
+                });
                 updateUser(name)
+                    .then(() => {
+                        setUser(() => {
+                            setUser({ ...user, displayName: name })
+                        })
+                    })
                 form.reset()
+                navigate('/')
             }).catch((err) => {
                 console.log(err)
                 if (err.message === 'Firebase: Error (auth/invalid-email).') {
@@ -122,7 +134,7 @@ const SignUp = () => {
 
                     <p className="text-center text-gray-500 font-medium mt-4">
                         Already have an account?{' '}
-                        <Link to='/signUp' className="text-indigo-600 hover:underline">
+                        <Link to='/login' className="text-indigo-600 hover:underline">
                             Log In
                         </Link>
                     </p>
